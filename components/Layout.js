@@ -1,5 +1,6 @@
 import { useSession, signIn, signOut } from "next-auth/react"
 import Nav from "@/components/Nav";
+import ToasterProvider from "@/providers/ToasterProvider";
 
 export default function Layout({children}) {
     const { data: session } = useSession()
@@ -18,6 +19,7 @@ export default function Layout({children}) {
     
     return (
         <div className="bg-red-900 min-h-screen flex">
+            <ToasterProvider />
             <Nav />
             <div className="bg-white flex-grow mt-2 mr-2 mb-2 rounded-lg p-4">
                 {children}
