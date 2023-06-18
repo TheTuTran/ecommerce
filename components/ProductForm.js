@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import Spinner from "./Spinner";
 
 export default function ProductForm({
     _id,
@@ -14,13 +15,14 @@ export default function ProductForm({
     const [description, setDescription] = useState(existingDescription || '');
     const [price, setPrice] = useState(existingPrice || '');
     const [images, setImages] = useState(existingImages || []);
+    const [isUploading, setIsUploading] = useState(false);
 
     const [goToProducts, setGoToProducts] = useState(false);
     const router = useRouter();
     
     async function saveProduct(ev) {
         ev.preventDefault();
-        const data = {title, description, price};
+        const data = {title, description, price, images};
         if (_id) {
             await axios.put('/api/products', {...data, _id});
             toast.success('Product updated!');
@@ -34,6 +36,7 @@ export default function ProductForm({
     async function uploadImages(ev) {
         const files = ev.target?.files;
         if (files.length > 0) {
+            setIsUploading(true);
             const data = new FormData();
             for (const file of files) {
                 data.append('file', file);
@@ -42,6 +45,7 @@ export default function ProductForm({
             setImages(oldImages => {    
                 return [...oldImages, ...res.data.links]
             });
+            setIsUploading(false);
         }
     };
 
@@ -56,12 +60,17 @@ export default function ProductForm({
             <label>
                 Photos
             </label>
-            <div className="mb-2">
-                {!!images?.length && images.map(link => {
-                    <div key={link}>
-                        {link}
+            <div className="mb-2 flex flex-wrap gap-1">
+                {!!images?.length && images.map(link => (
+                    <div key={link} className="h-24">
+                        <img src={link} alt="" className="rounded-lg"/>
                     </div>
-                })}
+                ))}
+                {isUploading && (
+                    <div className="flex items-center h-24">
+                        <Spinner />
+                    </div>
+                )}
                 <label className="cursor-pointer w-24 h-24 border flex text-sm gap-1 text-gray-500 rounded-lg bg-gray-200 transition hover:brightness-50 items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
@@ -69,11 +78,6 @@ export default function ProductForm({
                     Upload
                     <input type="file" onChange={uploadImages} className="hidden" />
                 </label>
-                {!images?.length && (
-                    <div>
-                        No photos in this product
-                    </div>
-                )}
             </div>
             <label>Description</label>
             <textarea value={description} onChange={ev => setDescription(ev.target.value)} placeholder="description"/>
