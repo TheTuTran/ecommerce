@@ -11,7 +11,7 @@ export default async function handler(req, res) {
         } else {
             res.json(await Product.find());
         }
-    }
+    };
 
     // if method is post, create a product
     if (method == 'POST') {
@@ -20,14 +20,14 @@ export default async function handler(req, res) {
             title, description, price
         })
         res.json(productDoc);
-    }
+    };
 
     // if method is put, update product
     if (method === 'PUT') {
         const {title, description, price, _id} = req.body;
         await Product.updateOne({_id}, {title, description, price})
         res.json(true);
-    }
+    };
 
     // if method is delete, create a product
     if (method === 'DELETE') {
@@ -35,6 +35,6 @@ export default async function handler(req, res) {
             await Product.deleteOne({_id:req.query?.id})
             res.json(true);
         }
-    }
+    };
 };
   
