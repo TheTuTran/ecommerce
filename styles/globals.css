@@ -2,12 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-input, textarea{
+input, textarea, select{
     @apply border-2 border-gray-300 rounded-md px-1 w-full;
     @apply mb-2;
 }
 
-input:focus, textarea:focus{
+input:focus, textarea:focus, select:focus{
     @apply border-red-900;
 }
 
@@ -23,7 +23,7 @@ label{
     @apply bg-red-900 text-white px-4 rounded-md py-1;
 }
 
-table.basic {
+table.basic{
     @apply w-full;
 }
 
@@ -39,7 +39,7 @@ table.basic a{
     @apply bg-red-900 text-white text-sm py-1 px-2 rounded-md gap-1 inline-flex mr-1;
 }
 
-.btn-default {
+.btn-default{
     @apply bg-gray-400 text-white px-4 py-1 rounded-md;
 }
 

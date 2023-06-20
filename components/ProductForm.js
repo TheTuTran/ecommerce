@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import Spinner from "./Spinner";
@@ -11,19 +11,27 @@ export default function ProductForm({
     description: existingDescription,
     price: existingPrice,
     images: existingImages,
+    category: existingCategory,
 }) {
     const [title, setTitle] = useState(existingTitle || '');
     const [description, setDescription] = useState(existingDescription || '');
     const [price, setPrice] = useState(existingPrice || '');
     const [images, setImages] = useState(existingImages || []);
     const [isUploading, setIsUploading] = useState(false);
-
     const [goToProducts, setGoToProducts] = useState(false);
+    const [categories, setCategories] = useState([]);
+    const [category, setCategory] = useState(existingCategory || '');
     const router = useRouter();
     
+    useEffect(() => {
+        axios.get('/api/categories').then(result => {
+            setCategories(result.data);
+        })
+    }, []);
+
     async function saveProduct(ev) {
         ev.preventDefault();
-        const data = {title, description, price, images};
+        const data = {title, description, price, images, category};
         if (_id) {
             await axios.put('/api/products', {...data, _id});
             toast.success('Product updated!');
@@ -62,6 +70,13 @@ export default function ProductForm({
         <form onSubmit={saveProduct}>
             <label>Product Name</label>
             <input value={title} onChange={ev => setTitle(ev.target.value)} type="text" placeholder="product name"/>
+            <label>Category</label>
+            <select value={category} onChange={ev => setCategory(ev.target.value)}>
+                <option value="">Uncategorized</option>
+                {categories.length > 0 && categories.map(category => (
+                    <option value={category._id}>{category.name}</option>
+                ))}
+            </select>
             <label>
                 Photos
             </label>
