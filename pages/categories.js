@@ -26,6 +26,13 @@ function Categories({swal}) {
         setEditedCategory(category);
         setName(category.name);
         setParentCategory(category?.parent?._id);
+        // turn properties back into a string from an array of objects
+        setProperties(
+            category.properties.map(({name, values}) => ({
+                name,
+                values: values.join(',')
+            }))
+        )
     }
 
      function deleteCategory(category) {
@@ -50,7 +57,14 @@ function Categories({swal}) {
     async function saveCategory(ev){
         ev.preventDefault();
         try {
-            const data = {name, parentCategory}
+            const data = {
+                name, 
+                parentCategory, 
+                properties: properties.map(property => ({
+                    name: property.name,
+                    values: property.values.split(',')
+                })),
+            };
             if (editedCategory) {
                 // grabs the id from editedcategory and put it into an object with data
                 data._id = editedCategory._id
@@ -60,7 +74,9 @@ function Categories({swal}) {
             } else {
                 await axios.post('/api/categories', data);
             }
-            setName('')
+            setName('');
+            setParentCategory('');
+            setProperties([]);
             toast.success('Category Saved!');
             fetchCategories();
         } catch (err) {
@@ -68,16 +84,38 @@ function Categories({swal}) {
         }
     }
 
+    // Add a property object to array of properties
     function addProperty() {
         setProperties(prev => {
             return [...prev, {name:'', values:''}];
         });
     }
+
+    // remove property object from array of properties by filtering by the property being removed
+    function removeProperty(indexToRemove) {
+        setProperties(prev => {
+            return [...prev].filter((_, propertyIndex) => {
+                return propertyIndex !== indexToRemove;
+            }); 
+        });
+    }
     
-    function handlePropertyNameChange(index, property, newName) {
-        console.log(index);
-        console.log(property);
-        console.log(newName)
+    // change property name label
+    function handlePropertyNameChange(index, newName) {
+        setProperties(prev => {
+            const properties = [...prev];
+            properties[index].name = newName;
+            return properties;
+        });
+    }
+
+    // change property values label
+    function handlePropertyValuesChange(index, newValues) {
+        setProperties(prev => {
+            const properties = [...prev];
+            properties[index].values = newValues;
+            return properties;
+        });
     }
 
     return <Layout>
@@ -96,19 +134,37 @@ function Categories({swal}) {
                 </div>
                 <div className="mb-2">
                     <label className="block">Properties</label>
-                    <button onClick={addProperty} type="button" className="btn-default text-sm">
+                    <button onClick={addProperty} type="button" className="btn-default text-sm mb-2">
                         Add New Property
                     </button>
                     {properties.length > 0 && properties.map((property, index) => {
-                        <div className="flex gap-1">
-                            <input type="text" value={property.name} onChange={ev => handlePropertyNameChange(index, property, ev.target.value)} placeholder="property name (ie: color)" />
-                            <input type="text" value={property.values} placeholder="values, comma separated" />
-                        </div>
+                        return (
+                            <div className="flex gap-1 mb-2">
+                                <input className="mb-0" type="text" value={property.name} onChange={ev => handlePropertyNameChange(index, ev.target.value)} placeholder="property name (ie: color)" />
+                                <input className="mb-0" type="text" value={property.values} onChange={ev => handlePropertyValuesChange(index, ev.target.value)} placeholder="values, comma separated (ie: red,blue...)" />
+                                <button onClick={() => removeProperty(index)} type="button" className="btn-default">Remove</button>
+                            </div>
+                        )
                     })}
                 </div>
-                <button type={'submit'} className="btn-primary py-1">
-                    Save
-                </button>
+                <div className="flex gap-1">
+                    {editedCategory && (
+                        <button type="button" 
+                            onClick={() => {
+                                setEditedCategory(null); 
+                                setName('');
+                                setParentCategory('');
+                                setProperties([]);
+                            }}
+                            className="btn-default"
+                        >
+                            Cancel Edit
+                        </button>
+                    )}
+                    <button type={'submit'} className="btn-primary py-1">
+                        Save
+                    </button>
+                </div>
             </form>
             <table className="basic mt-2">
             <thead>
