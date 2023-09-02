@@ -124,8 +124,8 @@ export default function ProductForm({
           ))}
       </select>
       {propertiesToFill.length > 0 &&
-        propertiesToFill.map((property) => (
-          <div className="">
+        propertiesToFill.map((property, index) => (
+          <div key={index}>
             <label>
               {property.name[0].toUpperCase() + property.name.substring(1)}
             </label>
@@ -136,8 +136,10 @@ export default function ProductForm({
                   setProductProp(property.name, ev.target.value)
                 }
               >
-                {property.values.map((value) => (
-                  <option value={value}>{value}</option>
+                {property.values.map((value, index) => (
+                  <option key={index} value={value}>
+                    {value}
+                  </option>
                 ))}
               </select>
             </div>
